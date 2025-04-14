@@ -1,0 +1,38 @@
+# Property of Alexis Dimitriadis
+
+prefix skos:<http://www.w3.org/2004/02/skos/core#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+# Adapt these to your project
+
+PREFIX ontology: <https://vocabulary.customer.com/MyProject/thesaurus/import/schema>
+PREFIX thesaurus: <https://vocabulary.customer.com/MyProject/thesaurus>
+
+SELECT ?subj ?slabel ?pred ?olabel
+WHERE
+
+{
+  GRAPH thesaurus: {
+
+    GRAPH ontology: {
+
+     # a property with a domain, defined in the ontology
+     ?pred rdfs:domain ?domain .     
+     ?domain a owl:Class .  # Without this, classes in "union" domains are flagged as violations
+
+    }
+    # used in a way that violates the domain
+    ?subj ?pred ?val .
+
+    FILTER NOT EXISTS { ?subj a ?domain } .
+
+    ?subj skos:prefLabel ?slabel .
+
+    OPTIONAL { ?val skos:prefLabel ?olabel }
+
+  }
+}
+
+ORDER BY ?pred ?slabel ?olabel
